@@ -114,7 +114,6 @@ class TMDB():
         
     def _getPosterURL(self, posterDict):
         for poster in posterDict:
-            print poster
             try:
                 if poster['image']['size'] == "cover":
                     return poster['image']['url']
@@ -143,14 +142,16 @@ class TMDB():
         return ' '.join(actors[:3])
     
     def _getResponse(self, url):
-        print url
         self._server_response = urlopen(url)
         self._server_msg = self._server_response.msg
         if "OK" not in self._server_msg:
             raise TMDBNotFoundError
         else:
             self._response_data = json.loads(self._server_response.read())[0]
-            return self._response_data
+            if "Nothing found" in self._response_data:
+                raise TMDBNotFoundError
+            else:
+                return self._response_data
         
 if __name__ == '__main__':
     connect()

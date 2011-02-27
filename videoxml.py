@@ -65,12 +65,12 @@ if __name__ == '__main__':
         movie_name = movie_fn_root.capitalize().replace('_', ' ')
         fn_xml = get_filename(movie_path, movie_fn_root, 'xml')
         fn_image = get_filename(movie_path, movie_fn_root, 'jpg')
-        print "For file: ", fn_video
-        print "Looking up: ", movie_name
+        print "For file:", fn_video
+        print "Looking up:", movie_name
         try:
             movie = tmdb.getMovieInfoByName(movie_name)
         except TMDBNotFoundError:
-            print movie_name, " not found"
+            print movie_name, "not found"
         else:
             if not file_exists(fn_xml):
                 if not generate_xml(fn_xml, movie.toxml()):
