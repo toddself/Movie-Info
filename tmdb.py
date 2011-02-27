@@ -1,31 +1,11 @@
 #!/usr/bin/env python
 
 from urllib2 import urlopen
-import webbrowser
+# import webbrowser
 import json
 
-class Movie():
-    tmdb_id = ''
-    imdb_id = ''
-    title = ''
-    year = ''
-    genre = ''
-    mpaa = ''
-    director = ''
-    actors = ''
-    description = ''
-    length = ''
-    
-    def __init__(self, **kwargs):
-        for k,v in kwargs.iteritems():
-            # print k, v
-            setattr(self, k, v)
-
-    def __str__(self):
-        return self.__unicode__()
-
-    def __unicode__(self):
-        return self.title
+from movie import Movie, connect
+from sqlobject import SQLObjectNotFound
 
 class TMDBUrls():
     available_outputs = ['xml', 'yaml', 'json']
@@ -45,14 +25,21 @@ class TMDBUrls():
 class TMDB():
     apikey = '32143db63692aa6a5cb01336cc06211b'
     token = ''
+    connection = None
 
     def __init__(self, apikey = '', output = 'json'):
         if apikey:
             self.apikey = apikey
         
         self.urls = TMDBUrls(output=output)
+        
+        connection = connect()
+        
+    def getMovieInfoByName(self, name):
+        this_id = self.getMovieIDByName(name)
+        return self.getMovieInfoByTMDB_ID(this_id)
 
-    def getMovieIDFromName(self, name):
+    def getMovieIDByName(self, name):
         self.domain = 'movie'
         self.action = 'search'
         self.searchTerm = name
@@ -69,22 +56,38 @@ class TMDB():
         if tmdb_id:
             self.tmdb_id = tmdb_id
         
-        self.url = "%s%s" % (self._generateURL(self.domain, self.action), self.tmdb_id)
+        try:    
+            movie_list = Movie.select(Movie.q.tmdb_id==self.tmdb_id)
+            if movie_list.count() == 1:
+                oMovie = movie_list[0]
+            elif movie_list.count() == 0:
+                raise SQLObjectNotFound
+            else:
+                raise AttributeError
+        except SQLObjectNotFound:
         
-        movie_info = self._getResponse(self.url)
+            self.url = "%s%s" % (self._generateURL(self.domain, self.action), self.tmdb_id)
         
-        oMovie = Movie(tmdb_id = movie_info['id'],
-                       imdb_id = movie_info['imdb_id'],
-                       title = movie_info['name'],
-                       year = movie_info['released'].split('-')[0],
-                       genre = self._getPrimaryGenre(movie_info['genres']),
-                       mpaa = movie_info['certification'],
-                       director = self._getDirector(movie_info['cast']),
-                       actors = self._getPrimaryActors(movie_info['cast']),
-                       description = movie_info['overview'],
-                       length = movie_info['runtime'])
+            movie_info = self._getResponse(self.url)
+        
+            oMovie = Movie(tmdb_id = movie_info['id'],
+                           imdb_id = movie_info['imdb_id'],
+                           title = movie_info['name'],
+                           year = int(movie_info['released'].split('-')[0]),
+                           genre = self._getPrimaryGenre(movie_info['genres']),
+                           mpaa = Movie.ratings.index(movie_info['certification']),
+                           director = self._getDirector(movie_info['cast']),
+                           actors = self._getPrimaryActors(movie_info['cast']),
+                           description = movie_info['overview'],
+                           length = int(movie_info['runtime']),
+                           poster_URL = self._getPosterURL(movie_info['posters']),
+                           )
         
         return oMovie
+        
+    def _getPosterURL(self, posterDict):
+        poster = posterDict[0]
+        return poster['image']['url']
     
     def _getPrimaryGenre(self, genreDict):
         mainGenre = genreDict[0]['name']
@@ -129,8 +132,9 @@ class TMDB():
         return self._baseURL
         
 if __name__ == '__main__':
+    connect()
     t = TMDB()
-    this_id = t.getMovieIDFromName('Mallrats')
+    this_id = t.getMovieIDByName('Aliens')
     print "ID: ", this_id
     this_movie = t.getMovieInfoByTMDB_ID(this_id)
-    print "Movie: ", this_movie
+    print this_movie.toxml()
