@@ -50,7 +50,7 @@ def generate_image(fn_image, image_url):
         return True
 
 def get_filename(movie_path, movie_name, extn):
-    return "%(path)s/%(name)s.%(extn)s" % {'path': movie_path, 'name': movie_name.lower(), 'extn': extn}
+    return "%(path)s/%(name)s.%(extn)s" % {'path': movie_path, 'name': movie_name, 'extn': extn}
 
 if __name__ == '__main__':
     basepath = os.getcwd()
@@ -62,7 +62,7 @@ if __name__ == '__main__':
         movie_fn_root = '.'.join(movie_fn.split('.')[:-1])
         movie_name = movie_fn_root.capitalize().replace('_', ' ')
         fn_xml = get_filename(movie_path, movie_fn_root, 'xml')
-        fn_image = get_filename(movie_path, movei_fn_root, 'jpg')
+        fn_image = get_filename(movie_path, movie_fn_root, 'jpg')
         print "For file: ", fn_video
         print "Looking up: ", movie_name
         try:
