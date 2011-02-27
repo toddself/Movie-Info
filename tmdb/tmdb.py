@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 
 from urllib2 import urlopen
-# import webbrowser
+from urllib import quote_plus
 import json
 
 from movie import Movie, connect
 from sqlobject import SQLObjectNotFound
+
+class TMDBNotFoundError(Exception):
+    pass
 
 class TMDBUrls():
     available_outputs = ['xml', 'yaml', 'json']
@@ -42,7 +45,7 @@ class TMDB():
     def getMovieIDByName(self, name):
         self.domain = 'movie'
         self.action = 'search'
-        self.searchTerm = name
+        self.searchTerm = quote_plus(name)
         
         self.url = "%s%s" % (self._generateURL(self.domain, self.action), self.searchTerm)
         
@@ -107,12 +110,22 @@ class TMDB():
         return ' '.join(actors[:3])
     
     def _getResponse(self, url):
+        print url
         self._server_response = urlopen(url)
-        self._json = json.load(self._server_response)
-        self.resp_dict = self._json[0]
+        self._server_msg = self._server_response.msg
+        if "OK" not in self._server_msg:
+            raise TMDBNotFoundError
+        else:
+            self._response_data = self._server_response.read()
         
-        return self.resp_dict
-    
+            self._json = json.loads(self._response_data)
+            if 'Nothing found' in self._json[0]:
+                raise TMDBNotFoundError
+            else:
+                self.resp_dict = self._json[0]
+        
+            return self.resp_dict
+
     def _generateURL(self, domain, action, auth=False):
         self._calledAPI = "%(domain)s.%(action)s" % \
                             {'domain': domain.capitalize(), 'action': action}
