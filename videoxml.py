@@ -40,6 +40,8 @@ def generate_xml(fn_xml, movie_xml):
         return True
 
 def generate_image(fn_image, image_url):
+    if len(image_url) < 1:
+        return False
     try:
         fh = open(fn_image, 'wb')
         fh.write(urlopen(image_url).read())

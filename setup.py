@@ -3,6 +3,6 @@
 from distutils.core import setup
 
 setup(name='movieinfo',
-      version='0.12',
+      version='0.20',
       scripts=['videoxml.py'],
       packages=['tmdb'],)

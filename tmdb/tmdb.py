@@ -1,8 +1,8 @@
 #!/usr/bin/env python
+import json
 
 from urllib2 import urlopen
 from urllib import quote_plus
-import json
 
 from movie import Movie, connect
 from sqlobject import SQLObjectNotFound
@@ -11,22 +11,38 @@ class TMDBNotFoundError(Exception):
     pass
 
 class TMDBUrls():
-    available_outputs = ['xml', 'yaml', 'json']
     base = 'http://api.themoviedb.org'
+    apikey = '32143db63692aa6a5cb01336cc06211b'
     version = '2.1'
     output = 'json'
     lang = 'en-US'
     
-    def __init__(self, output = '', lang = ''):
-        if output and output in self.available_outputs:
-            self.output = output
-        
+    def __init__(self, lang = '', version=''):
         if lang:
             self.lang = lang           
-                     
+        
+        if version:
+            self.version = version
+
+    def generateURL(self, domain, action, auth=False):
+        self._calledAPI = "%(domain)s.%(action)s" % \
+                            {'domain': domain.capitalize(), 'action': action}
+
+        url = "%(base)s/%(version)s/%(api)s/%(lang)s/%(output)s/%(apikey)s/" % \
+                              {'base': self.base,
+                               'version': self.version,
+                               'api': self._calledAPI,
+                               'lang': self.lang,
+                               'output': self.output,
+                               'apikey': self.apikey,}
+
+        if auth:
+            url = ''.join(url.split('/'+self.lang))
+
+        self._baseURL = url
+        return self._baseURL                         
 
 class TMDB():
-    apikey = '32143db63692aa6a5cb01336cc06211b'
     token = ''
     connection = None
 
@@ -34,7 +50,7 @@ class TMDB():
         if apikey:
             self.apikey = apikey
         
-        self.urls = TMDBUrls(output=output)
+        self.urls = TMDBUrls()
         
         connection = connect()
         
@@ -47,10 +63,18 @@ class TMDB():
         self.action = 'search'
         self.searchTerm = quote_plus(name)
         
-        self.url = "%s%s" % (self._generateURL(self.domain, self.action), self.searchTerm)
+        try:
+            movie_list = Movie.select(Movie.q.title==name)
+            if movie_list.count() == 1:
+                self.tmdb_id = movie_list[0].tmdb_id
+            else:
+                raise SQLObjectNotFound
+        except SQLObjectNotFound:
+            self.url = "%s%s" % (self.urls.generateURL(self.domain, self.action), self.searchTerm)
+
+            movie_info = self._getResponse(self.url)
+            self.tmdb_id = movie_info['id']
         
-        movie_info = self._getResponse(self.url)
-        self.tmdb_id = movie_info['id']
         return self.tmdb_id
         
     def getMovieInfoByTMDB_ID(self, tmdb_id=''):
@@ -69,7 +93,7 @@ class TMDB():
                 raise AttributeError
         except SQLObjectNotFound:
         
-            self.url = "%s%s" % (self._generateURL(self.domain, self.action), self.tmdb_id)
+            self.url = "%s%s" % (self.urls.generateURL(self.domain, self.action), self.tmdb_id)
         
             movie_info = self._getResponse(self.url)
         
@@ -89,8 +113,17 @@ class TMDB():
         return oMovie
         
     def _getPosterURL(self, posterDict):
-        poster = posterDict[0]
-        return poster['image']['url']
+        for poster in posterDict:
+            print poster
+            try:
+                if poster['image']['size'] == "cover":
+                    return poster['image']['url']
+            except KeyError:
+                if poster['image']['size'] == 'mid':
+                    return poster['image']['url']
+        
+        return ''
+                    
     
     def _getPrimaryGenre(self, genreDict):
         mainGenre = genreDict[0]['name']
@@ -116,33 +149,8 @@ class TMDB():
         if "OK" not in self._server_msg:
             raise TMDBNotFoundError
         else:
-            self._response_data = self._server_response.read()
-        
-            self._json = json.loads(self._response_data)
-            if 'Nothing found' in self._json[0]:
-                raise TMDBNotFoundError
-            else:
-                self.resp_dict = self._json[0]
-        
-            return self.resp_dict
-
-    def _generateURL(self, domain, action, auth=False):
-        self._calledAPI = "%(domain)s.%(action)s" % \
-                            {'domain': domain.capitalize(), 'action': action}
-        
-        url = "%(base)s/%(version)s/%(api)s/%(lang)s/%(output)s/%(apikey)s/" % \
-                              {'base': self.urls.base,
-                               'version': self.urls.version,
-                               'api': self._calledAPI,
-                               'lang': self.urls.lang,
-                               'output': self.urls.output,
-                               'apikey': self.apikey,}
-
-        if auth:
-            url = ''.join(url.split('/'+self.urls.lang))
-        
-        self._baseURL = url
-        return self._baseURL
+            self._response_data = json.loads(self._server_response.read())[0]
+            return self._response_data
         
 if __name__ == '__main__':
     connect()
