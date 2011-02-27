@@ -9,9 +9,6 @@ from tmdb.tmdb import TMDB, TMDBNotFoundError
 
 allowed_extensions = ['m4v', 'mp4', 'mov', 'wmv']
 
-def get_image():
-    pass
-    
 def get_video_filelist(basepath):
     videos = []
     for root, dirs, files in os.walk(basepath):
@@ -51,7 +48,7 @@ def generate_image(fn_image, image_url):
     else:
         return True
 
-def get_filename(movie_path, movie_name, extn):
+def make_filename(movie_path, movie_name, extn):
     return "%(path)s/%(name)s.%(extn)s" % {'path': movie_path, 'name': movie_name, 'extn': extn}
 
 if __name__ == '__main__':
@@ -63,15 +60,15 @@ if __name__ == '__main__':
         (movie_path, movie_fn) = fn_video.rsplit('/', 1)
         movie_fn_root = '.'.join(movie_fn.split('.')[:-1])
         movie_name = movie_fn_root.capitalize().replace('_', ' ')
-        fn_xml = get_filename(movie_path, movie_fn_root, 'xml')
-        fn_image = get_filename(movie_path, movie_fn_root, 'jpg')
+        fn_xml = make_filename(movie_path, movie_fn_root, 'xml')
+        fn_image = make_filename(movie_path, movie_fn_root, 'jpg')
         print "For file:", fn_video
         print "Looking up:", movie_name
         try:
             movie = tmdb.getMovieInfoByName(movie_name)
         except TMDBNotFoundError:
             print movie_name, "not found"
-        else:
+        else:            
             if not file_exists(fn_xml):
                 if not generate_xml(fn_xml, movie.toxml()):
                     print "ERROR: Couldn't create file: %s" % fn_xml
@@ -79,7 +76,4 @@ if __name__ == '__main__':
             if not file_exists(fn_image):
                 if not generate_image(fn_image, movie.poster_URL):
                     print "ERROR: Couldn't create file: %s" % fn_image
-                    sys.exit(2)
-        
-        
-            
+                    sys.exit(2)            

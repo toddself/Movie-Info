@@ -64,7 +64,7 @@ class TMDB():
         self.searchTerm = quote_plus(name)
         
         try:
-            movie_list = Movie.select(Movie.q.title==name)
+            movie_list = Movie.select("""movie.title LIKE '%s'""" % name)
             if movie_list.count() == 1:
                 self.tmdb_id = movie_list[0].tmdb_id
             else:
@@ -139,7 +139,7 @@ class TMDB():
             if member['job'] == 'Actor':
                 actors.append(member['name'])
         
-        return ' '.join(actors[:3])
+        return '  '.join(actors[:3])
     
     def _getResponse(self, url):
         self._server_response = urlopen(url)
