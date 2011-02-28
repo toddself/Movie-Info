@@ -2,11 +2,14 @@
 
 import os
 import sys
+import codecs
 from os.path import join as fjoin
 from urllib2 import urlopen
+from optparse import OptionParser
 
 from tmdb.tmdb import TMDB, TMDBNotFoundError
 
+__version__ = '0.50'
 allowed_extensions = ['m4v', 'mp4', 'mov', 'wmv']
 
 def get_video_filelist(basepath):
@@ -28,9 +31,10 @@ def file_exists(fn_xml):
         
 def generate_xml(fn_xml, movie_xml):
     try:
-        fh = open(fn_xml, 'w')
-        fh.write(movie_xml)
-        fh.close()
+        out = file(fn_xml, 'w')
+        out.write(codecs.BOM_UTF8)
+        out.write(movie_xml.encode('utf-8'))
+        out.close()
     except OSError:
         return False
     else:
@@ -49,23 +53,34 @@ def generate_image(fn_image, image_url):
         return True
 
 def make_filename(movie_path, movie_name, extn):
-    return "%(path)s/%(name)s.%(extn)s" % {'path': movie_path, 'name': movie_name, 'extn': extn}
+    return fjoin(movie_path, "%s.%s" % (movie_name, extn))
 
-if __name__ == '__main__':
+def main(argv):
+    usage = "usage: %prog [options] URL"
+    version = __version__
+    parser = OptionParser(usage=usage, version="%prog "+version)
+    
+    parser.add_option("-r", "--rename-files", action='store_true', dest="rename", 
+            default=True, help="Rename media files to match titles from TMDB")
+    (options, args) = parser.parse_args()    
+    
     basepath = os.getcwd()
     videos = get_video_filelist(basepath)
     
     for fn_video in videos:
         tmdb = TMDB()
         (movie_path, movie_fn) = fn_video.rsplit('/', 1)
-        movie_fn_root = '.'.join(movie_fn.split('.')[:-1])
-        movie_name = movie_fn_root.capitalize().replace('_', ' ')
-        fn_xml = make_filename(movie_path, movie_fn_root, 'xml')
-        fn_image = make_filename(movie_path, movie_fn_root, 'jpg')
-        print "For file:", fn_video
-        print "Looking up:", movie_name
+        (movie_fn_base, movie_fn_extn) = movie_fn.rsplit('.', 1)
+        movie_name = movie_fn_base.replace('_', ' ')
         try:
-            movie = tmdb.getMovieInfoByName(movie_name)
+            movie = tmdb.getMovieInfoByName(movie_fn_base)
+            if options.rename:
+                new_movie_fn_base = movie.title
+                os.rename(fn_video, make_filename(movie_path, new_movie_fn_base, movie_fn_extn))
+                movie_fn_base = new_movie_fn_base
+
+            fn_xml = make_filename(movie_path, movie_fn_base, 'xml')
+            fn_image = make_filename(movie_path, movie_fn_base, 'jpg')            
         except TMDBNotFoundError:
             print movie_name, "not found"
         else:            
@@ -77,3 +92,6 @@ if __name__ == '__main__':
                 if not generate_image(fn_image, movie.poster_URL):
                     print "ERROR: Couldn't create file: %s" % fn_image
                     sys.exit(2)            
+
+if __name__ == '__main__':
+    main(sys.argv[1:])

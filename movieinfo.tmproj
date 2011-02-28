@@ -10,7 +10,7 @@
 			<key>filename</key>
 			<string>setup.py</string>
 			<key>lastUsed</key>
-			<date>2011-02-27T20:42:42Z</date>
+			<date>2011-02-28T16:56:53Z</date>
 		</dict>
 		<dict>
 			<key>expanded</key>
@@ -26,7 +26,7 @@
 			<key>filename</key>
 			<string>videoxml.py</string>
 			<key>lastUsed</key>
-			<date>2011-02-27T23:28:14Z</date>
+			<date>2011-02-28T17:05:46Z</date>
 			<key>selected</key>
 			<true/>
 		</dict>
@@ -40,23 +40,9 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>19</integer>
+				<integer>25</integer>
 				<key>line</key>
-				<integer>5</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>0</integer>
-		</dict>
-		<key>tmdb/movie.py</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>30</integer>
-				<key>line</key>
-				<integer>34</integer>
+				<integer>6</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
@@ -68,9 +54,9 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>18</integer>
+				<integer>29</integer>
 				<key>line</key>
-				<integer>141</integer>
+				<integer>6</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
@@ -82,26 +68,25 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>13</integer>
+				<integer>0</integer>
 				<key>line</key>
-				<integer>70</integer>
+				<integer>82</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>0</integer>
+			<integer>51</integer>
 		</dict>
 	</dict>
 	<key>openDocuments</key>
 	<array>
 		<string>tmdb/tmdb.py</string>
 		<string>setup.py</string>
-		<string>tmdb/movie.py</string>
 		<string>videoxml.py</string>
 	</array>
 	<key>showFileHierarchyDrawer</key>
-	<true/>
+	<false/>
 	<key>windowFrame</key>
-	<string>{{136, 148}, {1117, 880}}</string>
+	<string>{{27, 18}, {1352, 851}}</string>
 </dict>
 </plist>
