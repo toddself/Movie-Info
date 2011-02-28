@@ -25,16 +25,16 @@ class Movie(SQLObject):
     ratings = ['G', 'NC-17', 'PG', 'PG-13', 'R', 'UR', 'UNRATED', 'NR', 'TV-Y', 'TV-Y7', 'TV-Y7-FV', 'TV-G', 'TV-PG', 'TV-14', 'TV-MA']
     
     tmdb_id = IntCol(unique=True)
-    imdb_id = UnicodeCol(length=64)
-    title = UnicodeCol(length=255)
-    year = IntCol()
-    genre = UnicodeCol(length=255)
+    imdb_id = UnicodeCol(length=64, default='')
+    title = UnicodeCol(length=255, default='')
+    year = IntCol(default=datetime.now().year)
+    genre = UnicodeCol(length=255, default='')
     mpaa = IntCol(default=UR)
-    director = UnicodeCol(length=255)
-    actors = UnicodeCol()
-    description = UnicodeCol()
-    length = IntCol()
-    poster_URL = UnicodeCol()
+    director = UnicodeCol(length=255, default='')
+    actors = UnicodeCol(default='')
+    description = UnicodeCol(default='')
+    length = IntCol(default=0)
+    poster_URL = UnicodeCol(default='')
 
     def _get_mpaa(self):
         return Movie.ratings[self._SO_get_mpaa()]

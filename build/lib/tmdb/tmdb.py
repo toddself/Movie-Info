@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 import json
+import sys
 
-from urllib2 import urlopen
+from urllib2 import urlopen, HTTPError
 from urllib import quote_plus
+from datetime import datetime
 
 from movie import Movie, connect
 from sqlobject import SQLObjectNotFound
@@ -93,24 +95,40 @@ class TMDB():
                 raise AttributeError
         except SQLObjectNotFound:
         
-            self.url = "%s%s" % (self.urls.generateURL(self.domain, self.action), self.tmdb_id)
+            self.url = "%s%s" % (self.urls.generateURL(self.domain, self.action), self.tmdb_id)        
+            self.movie_info = self._getResponse(self.url)
+            print self.urls
+            
         
-            movie_info = self._getResponse(self.url)
-        
-            oMovie = Movie(tmdb_id = movie_info['id'],
-                           imdb_id = movie_info['imdb_id'],
-                           title = movie_info['name'],
-                           year = int(movie_info['released'].split('-')[0]),
-                           genre = self._getPrimaryGenre(movie_info['genres']),
-                           mpaa = Movie.ratings.index(movie_info['certification']),
-                           director = self._getDirector(movie_info['cast']),
-                           actors = self._getPrimaryActors(movie_info['cast']),
-                           description = movie_info['overview'],
-                           length = int(movie_info['runtime']),
-                           poster_URL = self._getPosterURL(movie_info['posters']),
+            oMovie = Movie(tmdb_id = self._getKey('id', 0),
+                           imdb_id = self._getKey('imdb_id', ''),
+                           title = self._getKey('name', ''),
+                           year = int(self._getYearFromDate(self._getKey('released', ''))),
+                           genre = self._getPrimaryGenre(self._getKey('genres', [])),
+                           mpaa = Movie.ratings.index(self._getKey('certification', 'NR')),
+                           director = self._getDirector(self._getKey('cast', [])),
+                           actors = self._getPrimaryActors(self._getKey('cast', [])),
+                           description = self._getKey('overview', ''),
+                           length = int(self._getKey('runtime', 0)),
+                           poster_URL = self._getPosterURL(self._getKey('posters', '')),
                            )
         
         return oMovie
+        
+    def _getYearFromDate(self, dateStr):
+        if '-' in dateStr:
+            return dateStr.split('-')[0]
+        else:
+            return datetime.now().year
+        
+    def _getKey(self, key, default):
+        value = self.movie_info[key]
+        
+        if value == None or value == '':
+            return default
+        else:
+            return value
+            
         
     def _getPosterURL(self, posterDict):
         for poster in posterDict:
@@ -125,24 +143,38 @@ class TMDB():
                     
     
     def _getPrimaryGenre(self, genreDict):
-        mainGenre = genreDict[0]['name']
+        try:
+            mainGenre = genreDict[0]['name']
+        except IndexError:
+            mainGenre = ''
         return mainGenre
     
     def _getDirector(self, castDict):
         for member in castDict:
-            if member['job'] == 'Director':
-                return member['name']
+            try:
+                if member['job'] == 'Director':
+                    return member['name']
+            except KeyError:
+                return ''
+
     
     def _getPrimaryActors(self, castDict):
         actors = []
         for member in castDict:
-            if member['job'] == 'Actor':
-                actors.append(member['name'])
-        
-        return '  '.join(actors[:3])
+            try:
+                if member['job'] == 'Actor':
+                    actors.append(member['name'])
+            except KeyError:
+                pass
+        return '     '.join(actors[:3])
     
     def _getResponse(self, url):
-        self._server_response = urlopen(url)
+        try:
+            self._server_response = urlopen(url)
+        except HTTPError:
+            print "Couldn't open:", url
+            sys.exit(3)
+
         self._server_msg = self._server_response.msg
         if "OK" not in self._server_msg:
             raise TMDBNotFoundError
