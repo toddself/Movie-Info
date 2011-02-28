@@ -12,7 +12,6 @@ from videoxml import __version__
 setup(name='MovieInfo',
       version=__version__,
       scripts=['videoxml.py'],
-      # packages=['tmdb'],
       author='Todd Kennedy',
       author_email='todd.kennedy@gmail.com',
       url='http://robotholocaust.com',

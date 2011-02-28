@@ -97,9 +97,7 @@ class TMDB():
         
             self.url = "%s%s" % (self.urls.generateURL(self.domain, self.action), self.tmdb_id)        
             self.movie_info = self._getResponse(self.url)
-            print self.urls
-            
-        
+                    
             oMovie = Movie(tmdb_id = self._getKey('id', 0),
                            imdb_id = self._getKey('imdb_id', ''),
                            title = self._getKey('name', ''),
