@@ -3,14 +3,14 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>videoxml.py</string>
+	<string>tmdb/tmdb.py</string>
 	<key>documents</key>
 	<array>
 		<dict>
 			<key>filename</key>
 			<string>setup.py</string>
 			<key>lastUsed</key>
-			<date>2011-02-28T16:56:53Z</date>
+			<date>2011-02-28T18:06:40Z</date>
 		</dict>
 		<dict>
 			<key>expanded</key>
@@ -26,9 +26,7 @@
 			<key>filename</key>
 			<string>videoxml.py</string>
 			<key>lastUsed</key>
-			<date>2011-02-28T17:14:35Z</date>
-			<key>selected</key>
-			<true/>
+			<date>2011-02-28T18:06:48Z</date>
 		</dict>
 	</array>
 	<key>fileHierarchyDrawerWidth</key>
@@ -40,9 +38,9 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>25</integer>
+				<integer>0</integer>
 				<key>line</key>
-				<integer>6</integer>
+				<integer>14</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
@@ -54,28 +52,44 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>29</integer>
+				<integer>91</integer>
 				<key>line</key>
-				<integer>6</integer>
+				<integer>103</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>0</integer>
+			<integer>77</integer>
 		</dict>
 		<key>videoxml.py</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>0</integer>
+				<integer>17</integer>
 				<key>line</key>
-				<integer>53</integer>
+				<integer>84</integer>
 			</dict>
+			<key>columnSelection</key>
+			<false/>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
 			<integer>52</integer>
+			<key>selectFrom</key>
+			<dict>
+				<key>column</key>
+				<integer>12</integer>
+				<key>line</key>
+				<integer>84</integer>
+			</dict>
+			<key>selectTo</key>
+			<dict>
+				<key>column</key>
+				<integer>17</integer>
+				<key>line</key>
+				<integer>84</integer>
+			</dict>
 		</dict>
 	</dict>
 	<key>openDocuments</key>
